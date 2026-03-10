@@ -1,0 +1,380 @@
+﻿<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Focus</title>
+  <link rel='stylesheet' href='styles.css'>
+</head>
+<body class='theme-obsidian display-airy bg-midnight'>
+  <div class='app'>
+    <button class='menu-button' id='menuButton' type='button' aria-label='Open sidebar' aria-expanded='false' aria-controls='sidebar'>
+      <span class='menu-lines' aria-hidden='true'>
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+
+    <div class='overlay' id='overlay' aria-hidden='true'></div>
+
+    <aside class='sidebar' id='sidebar' aria-label='Focus settings'>
+      <div class='sidebar-inner'>
+        <section class='panel panel--first'>
+          <h2 class='panel-title'>Stats</h2>
+          <div class='row-list'>
+            <div class='stat-row'>
+              <span>Total Focus Time Today</span>
+              <span id='todayFocus'>0h 0m</span>
+            </div>
+            <div class='stat-row'>
+              <span>Completed Sessions Today</span>
+              <span id='todaySessions'>0</span>
+            </div>
+            <div class='stat-row'>
+              <span>All-Time Focus</span>
+              <span id='allTimeFocus'>0h 0m</span>
+            </div>
+          </div>
+          <button class='detail-button' id='openStatsButton' type='button'>Open Detailed Stats</button>
+        </section>
+
+        <section class='panel'>
+          <h2 class='panel-title'>Language</h2>
+          <div class='option-list option-list--compact'>
+            <button class='lang-option' type='button' data-language='tr' aria-label='Turkish language'>TR</button>
+            <button class='lang-option' type='button' data-language='en' aria-label='English language'>US</button>
+          </div>
+        </section>
+
+        <section class='panel'>
+          <h2 class='panel-title'>Mode Selection</h2>
+          <div class='option-list'>
+            <button class='mode-option' type='button' data-mode='countdown'>
+              <span>Countdown Timer</span>
+              <span class='mode-option__meta'>Pomodoro</span>
+            </button>
+            <button class='mode-option' type='button' data-mode='stopwatch'>
+              <span>Stopwatch</span>
+              <span class='mode-option__meta'>Count Up</span>
+            </button>
+            <button class='mode-option' type='button' data-mode='clock'>
+              <span>Clock</span>
+              <span class='mode-option__meta'>Live Time</span>
+            </button>
+          </div>
+        </section>
+
+        <section class='panel'>
+          <h2 class='panel-title'>Timer Settings</h2>
+          <div class='row-list'>
+            <div class='row'>
+              <div class='copy'>
+                <strong>Work Duration</strong>
+                <small>Used for each completed countdown focus session.</small>
+              </div>
+              <label class='field'>
+                <span class='sr-only'>Work duration in minutes</span>
+                <input id='workInput' type='number' min='1' max='180' step='1' inputmode='numeric'>
+              </label>
+            </div>
+            <div class='row'>
+              <div class='copy'>
+                <strong>Break Duration</strong>
+                <small>Starts automatically after a completed work session.</small>
+              </div>
+              <label class='field'>
+                <span class='sr-only'>Break duration in minutes</span>
+                <input id='breakInput' type='number' min='0' max='90' step='1' inputmode='numeric'>
+              </label>
+            </div>
+            <div class='stat-row'>
+              <span>Current Phase</span>
+              <span id='phaseValue'>Focus</span>
+            </div>
+          </div>
+        </section>
+
+        <section class='panel'>
+          <h2 class='panel-title'>Daily Goal</h2>
+          <div class='row-list'>
+            <div class='row'>
+              <div class='copy'>
+                <strong>Enable Daily Goal</strong>
+                <small>Keep one quiet target for the day.</small>
+              </div>
+              <label class='switch'>
+                <input id='goalToggle' type='checkbox' role='switch' aria-label='Enable daily goal'>
+                <span class='track'><span class='thumb'></span></span>
+              </label>
+            </div>
+            <div class='row'>
+              <div class='copy'>
+                <strong>Goal Duration</strong>
+                <small id='goalCopy'>0h 0m completed today.</small>
+              </div>
+              <label class='field'>
+                <span class='sr-only'>Daily goal duration in minutes</span>
+                <input id='goalInput' type='number' min='15' max='720' step='15' inputmode='numeric'>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class='panel'>
+          <h2 class='panel-title'>Visibility</h2>
+          <div class='row-list'>
+            <div class='row'>
+              <div class='copy'>
+                <strong>Show Seconds</strong>
+                <small>Include seconds in clock, countdown and stopwatch displays.</small>
+              </div>
+              <label class='switch'>
+                <input id='showSecondsToggle' type='checkbox' role='switch' aria-label='Show seconds in timer display'>
+                <span class='track'><span class='thumb'></span></span>
+              </label>
+            </div>
+            <div class='row'>
+              <div class='copy'>
+                <strong>Show Today's Focus</strong>
+                <small>Display a single muted line beneath the controls.</small>
+              </div>
+              <label class='switch'>
+                <input id='showFocusToggle' type='checkbox' role='switch' aria-label='Show today focus on main screen'>
+                <span class='track'><span class='thumb'></span></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class='panel'>
+          <h2 class='panel-title'>Personalization</h2>
+          <div class='row-list personalization-stack'>
+            <div class='mini-section'>
+              <span class='mini-section__title'>Layout</span>
+              <div class='option-list option-list--compact'>
+                <button class='layout-option' type='button' data-layout='flip'>Flip</button>
+                <button class='layout-option' type='button' data-layout='classic'>Classic</button>
+              </div>
+            </div>
+
+            <div class='mini-section'>
+              <span class='mini-section__title'>Theme</span>
+              <div class='swatch-grid swatch-grid--large'>
+                <button class='color-swatch color-swatch--obsidian' type='button' data-theme='obsidian' aria-label='Obsidian theme' title='Obsidian'></button>
+                <button class='color-swatch color-swatch--graphite' type='button' data-theme='graphite' aria-label='Graphite theme' title='Graphite'></button>
+                <button class='color-swatch color-swatch--cinder' type='button' data-theme='cinder' aria-label='Cinder theme' title='Cinder'></button>
+                <button class='color-swatch color-swatch--rose' type='button' data-theme='rose' aria-label='Rose theme' title='Rose'></button>
+                <button class='color-swatch color-swatch--blush' type='button' data-theme='blush' aria-label='Blush theme' title='Blush'></button>
+                <button class='color-swatch color-swatch--pearl' type='button' data-theme='pearl' aria-label='Pearl theme' title='Pearl'></button>
+              </div>
+            </div>
+
+            <div class='mini-section'>
+              <span class='mini-section__title'>Display</span>
+              <div class='style-grid'>
+                <button class='style-option' type='button' data-style='airy'>Airy</button>
+                <button class='style-option' type='button' data-style='balanced'>Balanced</button>
+                <button class='style-option' type='button' data-style='defined'>Defined</button>
+              </div>
+            </div>
+
+            <div class='mini-section'>
+              <span class='mini-section__title'>Background</span>
+              <div class='swatch-grid'>
+                <button class='background-swatch background-swatch--midnight' type='button' data-background='midnight' aria-label='Midnight background' title='Midnight'></button>
+                <button class='background-swatch background-swatch--forest' type='button' data-background='forest' aria-label='Forest background' title='Forest'></button>
+                <button class='background-swatch background-swatch--ocean' type='button' data-background='ocean' aria-label='Ocean background' title='Ocean'></button>
+                <button class='background-swatch background-swatch--dawn' type='button' data-background='dawn' aria-label='Dawn background' title='Dawn'></button>
+                <button class='background-swatch background-swatch--alpine' type='button' data-background='alpine' aria-label='Alpine background' title='Alpine'></button>
+                <button class='background-swatch background-swatch--sand' type='button' data-background='sand' aria-label='Sand background' title='Sand'></button>
+                <button class='background-swatch background-swatch--rosewater' type='button' data-background='rosewater' aria-label='Rosewater background' title='Rosewater'></button>
+                <button class='background-swatch background-swatch--petal' type='button' data-background='petal' aria-label='Petal background' title='Petal'></button>
+                <button class='background-swatch background-swatch--berry' type='button' data-background='berry' aria-label='Berry background' title='Berry'></button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+    <main class='stage'>
+      <section class='main-shell' id='mainShell'>
+        <div class='display-shell'>
+          <div class='flip-display' id='flipDisplay' role='timer' aria-live='polite'>
+            <div class='flip-group' data-group='0'>
+              <div class='flip-digit' data-slot='0'>
+                <div class='flip-static flip-static--top'><span>0</span></div>
+                <div class='flip-static flip-static--bottom'><span>0</span></div>
+                <div class='flip-flap flip-flap--top'><span>0</span></div>
+                <div class='flip-flap flip-flap--bottom'><span>0</span></div>
+              </div>
+              <div class='flip-digit' data-slot='1'>
+                <div class='flip-static flip-static--top'><span>0</span></div>
+                <div class='flip-static flip-static--bottom'><span>0</span></div>
+                <div class='flip-flap flip-flap--top'><span>0</span></div>
+                <div class='flip-flap flip-flap--bottom'><span>0</span></div>
+              </div>
+            </div>
+
+            <div class='flip-divider' data-divider='0' aria-hidden='true'>
+              <span class='flip-divider__dot'></span>
+              <span class='flip-divider__dot'></span>
+            </div>
+
+            <div class='flip-group' data-group='1'>
+              <div class='flip-digit' data-slot='2'>
+                <div class='flip-static flip-static--top'><span>0</span></div>
+                <div class='flip-static flip-static--bottom'><span>0</span></div>
+                <div class='flip-flap flip-flap--top'><span>0</span></div>
+                <div class='flip-flap flip-flap--bottom'><span>0</span></div>
+              </div>
+              <div class='flip-digit' data-slot='3'>
+                <div class='flip-static flip-static--top'><span>0</span></div>
+                <div class='flip-static flip-static--bottom'><span>0</span></div>
+                <div class='flip-flap flip-flap--top'><span>0</span></div>
+                <div class='flip-flap flip-flap--bottom'><span>0</span></div>
+              </div>
+            </div>
+
+            <div class='flip-divider' data-divider='1' aria-hidden='true' hidden>
+              <span class='flip-divider__dot'></span>
+              <span class='flip-divider__dot'></span>
+            </div>
+
+            <div class='flip-group' data-group='2' hidden>
+              <div class='flip-digit' data-slot='4'>
+                <div class='flip-static flip-static--top'><span>0</span></div>
+                <div class='flip-static flip-static--bottom'><span>0</span></div>
+                <div class='flip-flap flip-flap--top'><span>0</span></div>
+                <div class='flip-flap flip-flap--bottom'><span>0</span></div>
+              </div>
+              <div class='flip-digit' data-slot='5'>
+                <div class='flip-static flip-static--top'><span>0</span></div>
+                <div class='flip-static flip-static--bottom'><span>0</span></div>
+                <div class='flip-flap flip-flap--top'><span>0</span></div>
+                <div class='flip-flap flip-flap--bottom'><span>0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class='classic-display' id='classicDisplay' hidden aria-hidden='true'>25:00</div>
+        </div>
+
+        <div class='controls' aria-label='Timer controls'>
+          <button class='control' id='startButton' type='button'>Start</button>
+          <button class='control' id='stopButton' type='button'>Stop</button>
+          <button class='control' id='cancelButton' type='button'>Cancel</button>
+        </div>
+
+        <p class='footnote' id='footnote' hidden>Today's Focus: 0h 0m</p>
+      </section>
+    </main>
+
+    <section class='stats-page' id='statsPage' hidden>
+      <div class='stats-page__backdrop' id='statsBackdrop'></div>
+      <article class='stats-page__panel'>
+        <header class='stats-page__header'>
+          <div>
+            <p class='eyebrow'>Analytics</p>
+            <h2 class='stats-page__title'>Detailed Focus Stats</h2>
+            <p class='stats-page__copy'>A dedicated view for trends, recent sessions and progress over time.</p>
+          </div>
+          <button class='stats-page__close' id='closeStatsButton' type='button'>Close</button>
+        </header>
+
+        <section class='stats-summary-grid'>
+          <div class='metric-card'>
+            <span class='metric-card__label'>Today</span>
+            <strong class='metric-card__value' id='metricTodayFocus'>0h 0m</strong>
+            <span class='metric-card__sub' id='metricTodaySessions'>0 sessions</span>
+          </div>
+          <div class='metric-card'>
+            <span class='metric-card__label'>This Week</span>
+            <strong class='metric-card__value' id='metricWeekFocus'>0h 0m</strong>
+            <span class='metric-card__sub' id='metricWeekSessions'>0 sessions</span>
+          </div>
+          <div class='metric-card'>
+            <span class='metric-card__label'>Average Session</span>
+            <strong class='metric-card__value' id='metricAverageSession'>0m</strong>
+            <span class='metric-card__sub' id='metricStreak'>0 day streak</span>
+          </div>
+          <div class='metric-card'>
+            <span class='metric-card__label'>All-Time</span>
+            <strong class='metric-card__value' id='metricAllTimeFocus'>0h 0m</strong>
+            <span class='metric-card__sub' id='metricAllTimeSessions'>0 sessions</span>
+          </div>
+        </section>
+
+        <section class='stats-block'>
+          <div class='stats-block__header'>
+            <h3>Last 7 Days</h3>
+            <span id='weeklyFocusSummary'>0h 0m total</span>
+          </div>
+          <div class='bar-chart' id='weeklyBars'></div>
+        </section>
+
+        <section class='stats-duo'>
+          <section class='stats-block'>
+            <div class='stats-block__header'>
+              <h3>14-Day Trend</h3>
+              <span id='trendFocusSummary'>Daily focus trend</span>
+            </div>
+            <svg class='line-chart' id='trendChart' viewBox='0 0 640 260' preserveAspectRatio='none' aria-label='Focus trend chart'>
+              <defs>
+                <linearGradient id='trendFill' x1='0' y1='0' x2='0' y2='1'>
+                  <stop offset='0%' stop-color='rgba(255,255,255,0.24)'></stop>
+                  <stop offset='100%' stop-color='rgba(255,255,255,0.02)'></stop>
+                </linearGradient>
+              </defs>
+              <path id='trendArea' class='line-chart__area'></path>
+              <path id='trendLine' class='line-chart__line'></path>
+              <g id='trendDots'></g>
+            </svg>
+            <div class='line-chart__labels' id='trendLabels'></div>
+          </section>
+
+          <section class='stats-block'>
+            <div class='stats-block__header'>
+              <h3>Mode Split</h3>
+              <span id='modeSplitSummary'>Countdown vs Stopwatch</span>
+            </div>
+            <div class='mode-chart'>
+              <div class='mode-chart__ring' id='modeRing'>
+                <div class='mode-chart__ring-core'>
+                  <strong id='modeRingValue'>0h</strong>
+                  <span>total</span>
+                </div>
+              </div>
+              <div class='mode-chart__legend'>
+                <div class='legend-row'>
+                  <span class='legend-dot legend-dot--countdown'></span>
+                  <span>Countdown</span>
+                  <strong id='countdownSplitValue'>0%</strong>
+                </div>
+                <div class='legend-row'>
+                  <span class='legend-dot legend-dot--stopwatch'></span>
+                  <span>Stopwatch</span>
+                  <strong id='stopwatchSplitValue'>0%</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class='stats-block'>
+          <div class='stats-block__header'>
+            <h3>Recent Sessions</h3>
+            <span id='recentSessionsSummary'>Most recent completed sessions</span>
+          </div>
+          <div class='session-list' id='recentSessionsList'></div>
+        </section>
+      </article>
+    </section>
+  </div>
+
+  <script src='app.js'></script>
+</body>
+</html>
+
+
+
