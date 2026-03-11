@@ -1,7 +1,10 @@
-﻿(() => {
+(() => {
   const COOKIE_KEY = 'focus_app_cookie';
   const FALLBACK_KEY = 'focus_app_fallback';
   const LEGACY_KEYS = ['premium-focus-state-v3', 'premium-focus-state-v2', 'premium-focus-state-v1'];
+  const TICK_INTERVAL_MS = 1000;
+  const FLIP_DURATION_MS = 600;
+  const FLIP_REVEAL_DELAY_MS = 280;
   const DEFAULTS = {
     mode: 'countdown',
     workDuration: 25 * 60,
@@ -115,7 +118,7 @@
     primeCountdown('work', false);
     saveStore();
     renderAll();
-    window.setInterval(tick, 120);
+    window.setInterval(tick, TICK_INTERVAL_MS);
   }
 
   function prepareFlipSlots() {
@@ -291,6 +294,37 @@
     return normalizeStore(parsed);
   }
 
+  function normalizeMode(value) {
+    return ['countdown', 'stopwatch', 'clock'].includes(value) ? value : DEFAULTS.mode;
+  }
+
+  function normalizeTheme(value) {
+    return ['obsidian', 'graphite', 'cinder', 'rose', 'blush', 'pearl'].includes(value) ? value : DEFAULTS.theme;
+  }
+
+  function normalizeStyle(value) {
+    return ['airy', 'balanced', 'defined'].includes(value) ? value : DEFAULTS.timerStyle;
+  }
+
+  function normalizeLayout(value) {
+    return ['flip', 'classic'].includes(value) ? value : DEFAULTS.displayLayout;
+  }
+
+  function normalizeBackground(value) {
+    return ['midnight', 'forest', 'ocean', 'dawn', 'alpine', 'sand', 'rosewater', 'petal', 'berry'].includes(value) ? value : DEFAULTS.background;
+  }
+
+  function normalizeBoolean(value, fallback) {
+    if (value === undefined || value === null || value === '') {
+      return fallback;
+    }
+    if (typeof value === 'string') {
+      const lowered = value.toLowerCase();
+      if (lowered === 'true' || lowered === '1') return true;
+      if (lowered === 'false' || lowered === '0') return false;
+    }
+    return Boolean(value);
+  }
   function normalizeStore(parsed) {
     if (!parsed) {
       return createDefaultStore();
@@ -300,18 +334,18 @@
       return {
         prefs: {
           ...DEFAULTS,
-          mode: parsed.p?.m || DEFAULTS.mode,
+          mode: normalizeMode(parsed.p?.m),
           workDuration: clampNumber(Number(parsed.p?.w), 60, 180 * 60, DEFAULTS.workDuration),
           breakDuration: clampNumber(Number(parsed.p?.b), 0, 90 * 60, DEFAULTS.breakDuration),
-          dailyGoalEnabled: Boolean(parsed.p?.ge ?? DEFAULTS.dailyGoalEnabled),
+          dailyGoalEnabled: normalizeBoolean(parsed.p?.ge, DEFAULTS.dailyGoalEnabled),
           dailyGoalSeconds: clampNumber(Number(parsed.p?.g), 15 * 60, 720 * 60, DEFAULTS.dailyGoalSeconds),
-          showTodayFocus: Boolean(parsed.p?.sf ?? DEFAULTS.showTodayFocus),
-          showSeconds: Boolean(parsed.p?.ss ?? DEFAULTS.showSeconds),
-          language: parsed.p?.lg || DEFAULTS.language,
-          theme: parsed.p?.t || DEFAULTS.theme,
-          timerStyle: parsed.p?.ty || DEFAULTS.timerStyle,
-          displayLayout: parsed.p?.l || DEFAULTS.displayLayout,
-          background: parsed.p?.bg || DEFAULTS.background
+          showTodayFocus: normalizeBoolean(parsed.p?.sf, DEFAULTS.showTodayFocus),
+          showSeconds: normalizeBoolean(parsed.p?.ss, DEFAULTS.showSeconds),
+          language: parsed.p?.lg === 'en' ? 'en' : 'tr',
+          theme: normalizeTheme(parsed.p?.t),
+          timerStyle: normalizeStyle(parsed.p?.ty),
+          displayLayout: normalizeLayout(parsed.p?.l),
+          background: normalizeBackground(parsed.p?.bg)
         },
         stats: {
           allTimeFocusSeconds: Number(parsed.s?.a) || 0,
@@ -330,7 +364,15 @@
     prefs.workDuration = clampNumber(Number(prefs.workDuration), 60, 180 * 60, DEFAULTS.workDuration);
     prefs.breakDuration = clampNumber(Number(prefs.breakDuration), 0, 90 * 60, DEFAULTS.breakDuration);
     prefs.dailyGoalSeconds = clampNumber(Number(prefs.dailyGoalSeconds), 15 * 60, 720 * 60, DEFAULTS.dailyGoalSeconds);
+    prefs.mode = normalizeMode(prefs.mode);
     prefs.language = prefs.language === 'en' ? 'en' : 'tr';
+    prefs.theme = normalizeTheme(prefs.theme);
+    prefs.timerStyle = normalizeStyle(prefs.timerStyle);
+    prefs.displayLayout = normalizeLayout(prefs.displayLayout);
+    prefs.background = normalizeBackground(prefs.background);
+    prefs.dailyGoalEnabled = normalizeBoolean(prefs.dailyGoalEnabled, DEFAULTS.dailyGoalEnabled);
+    prefs.showTodayFocus = normalizeBoolean(prefs.showTodayFocus, DEFAULTS.showTodayFocus);
+    prefs.showSeconds = normalizeBoolean(prefs.showSeconds, DEFAULTS.showSeconds);
 
     const daily = {};
     const legacyDays = parsed.stats?.daily || parsed.stats?.days || {};
@@ -802,74 +844,74 @@
   const TRANSLATIONS = {
     tr: {
       title: 'Odak',
-      openSidebar: 'Menüyü aç',
-      sidebarAria: 'Odak ayarları',
-      controlsAria: 'Zamanlayıcı kontrolleri',
-      stats: 'İstatistikler',
+      openSidebar: 'Menuyu ac',
+      sidebarAria: 'Odak ayarlari',
+      controlsAria: 'Zamanlayici kontrolleri',
+      stats: 'Istatistikler',
       language: 'Dil',
-      modeSelection: 'Mod Seçimi',
-      timerSettings: 'Zamanlayıcı Ayarları',
-      dailyGoal: 'Günlük Hedef',
-      visibility: 'Görünürlük',
-      personalization: 'Kişiselleştirme',
-      totalFocusToday: 'Bugünkü Toplam Odak',
-      completedSessionsToday: 'Bugünkü Tamamlanan Seans',
-      allTimeFocus: 'Tüm Zamanlar Odak',
-      openDetailedStats: 'Detaylı İstatistikler',
-      countdownTimer: 'Geri Sayım',
+      modeSelection: 'Mod Secimi',
+      timerSettings: 'Zamanlayici Ayarlari',
+      dailyGoal: 'Gunluk Hedef',
+      visibility: 'Gorunurluk',
+      personalization: 'Kisisellestirme',
+      totalFocusToday: 'Bugunku Toplam Odak',
+      completedSessionsToday: 'Bugunku Tamamlanan Seans',
+      allTimeFocus: 'Tum Zamanlar Odak',
+      openDetailedStats: 'Detayli Istatistikler',
+      countdownTimer: 'Geri Sayim',
       pomodoro: 'Pomodoro',
       stopwatch: 'Kronometre',
-      countUp: 'İleri Sayım',
+      countUp: 'Ileri Sayim',
       clock: 'Saat',
-      liveTime: 'Canlı Saat',
-      workDuration: 'Çalışma Süresi',
-      workDurationCopy: 'Tamamlanan her odak seansı için kullanılır.',
-      breakDuration: 'Mola Süresi',
-      breakDurationCopy: 'Çalışma seansından sonra otomatik başlar.',
-      currentPhase: 'Geçerli Faz',
+      liveTime: 'Canli Saat',
+      workDuration: 'Calisma Suresi',
+      workDurationCopy: 'Tamamlanan her odak seansi icin kullanilir.',
+      breakDuration: 'Mola Suresi',
+      breakDurationCopy: 'Calisma seansindan sonra otomatik baslar.',
+      currentPhase: 'Gecerli Faz',
       focus: 'Odak',
       break: 'Mola',
-      livePhase: 'Canlı Saat',
-      completed: 'Tamamlandı',
-      enableDailyGoal: 'Günlük Hedef',
-      enableDailyGoalCopy: 'Gün için sakin bir hedef tut.',
-      goalDuration: 'Hedef Süresi',
-      showSeconds: 'Saniyeyi Göster',
-      showSecondsCopy: 'Saat, geri sayım ve kronometrede saniyeyi göster.',
-      showTodayFocus: 'Bugünkü Odağı Göster',
-      showTodayFocusCopy: 'Kontrollerin altında tek satır göster.',
-      layout: 'Düzen',
+      livePhase: 'Canli Saat',
+      completed: 'Tamamlandi',
+      enableDailyGoal: 'Gunluk Hedef',
+      enableDailyGoalCopy: 'Gun icin sakin bir hedef tut.',
+      goalDuration: 'Hedef Suresi',
+      showSeconds: 'Saniyeyi Goster',
+      showSecondsCopy: 'Saat, geri sayim ve kronometrede saniyeyi goster.',
+      showTodayFocus: 'Bugunku Odagi Goster',
+      showTodayFocusCopy: 'Kontrollerin altinda tek satir goster.',
+      layout: 'Duzen',
       theme: 'Tema',
-      display: 'Görünüm',
+      display: 'Gorunum',
       background: 'Arka Plan',
       airy: 'Havadar',
       balanced: 'Dengeli',
       defined: 'Belirgin',
-      start: 'Başlat',
+      start: 'Baslat',
       stop: 'Durdur',
-      cancel: 'İptal',
-      todayFocusLabel: "Bugünkü Odak",
+      cancel: 'Iptal',
+      todayFocusLabel: 'Bugunku Odak',
       analytics: 'Analitik',
-      detailedFocusStats: 'Detaylı Odak İstatistikleri',
-      detailedStatsCopy: 'Trendler, son seanslar ve ilerleme için özel görünüm.',
+      detailedFocusStats: 'Detayli Odak Istatistikleri',
+      detailedStatsCopy: 'Trendler, son seanslar ve ilerleme icin ozel gorunum.',
       close: 'Kapat',
-      today: 'Bugün',
+      today: 'Bugun',
       thisWeek: 'Bu Hafta',
       averageSession: 'Ortalama Seans',
-      allTime: 'Tüm Zamanlar',
-      last7Days: 'Son 7 Gün',
-      trend14: '14 Günlük Trend',
-      modeSplit: 'Mod Dağılımı',
+      allTime: 'Tum Zamanlar',
+      last7Days: 'Son 7 Gun',
+      trend14: '14 Gunluk Trend',
+      modeSplit: 'Mod Dagilimi',
       recentSessions: 'Son Seanslar',
       total: 'toplam',
       recorded: 'kaydedildi',
-      noCompletedSessions: 'Henüz tamamlanan seans yok',
-      countdown: 'Geri Sayım',
+      noCompletedSessions: 'Henuz tamamlanan seans yok',
+      countdown: 'Geri Sayim',
       stopwatchLabel: 'Kronometre',
       sessions: 'seans',
-      dayStreak: 'gün seri',
-      over14Days: '14 günde',
-      completedToday: 'bugün tamamlandı.',
+      dayStreak: 'gun seri',
+      over14Days: '14 gunde',
+      completedToday: 'bugun tamamlandi.',
       of: ' / ',
       min: 'dk'
     },
@@ -885,6 +927,7 @@
 
   function applyTranslations() {
     const lang = store.prefs.language === 'en' ? 'en' : 'tr';
+    const panels = Array.from(document.querySelectorAll('.sidebar .panel'));
     document.documentElement.lang = lang;
     document.title = t('title');
     el.menuButton.setAttribute('aria-label', t('openSidebar'));
@@ -922,7 +965,7 @@
       el.modeButtons[2].children[1].textContent = t('liveTime');
     }
 
-    const settingsRows = Array.from(document.querySelectorAll('.panel:nth-of-type(3) .row'));
+    const settingsRows = Array.from(panels[3]?.querySelectorAll('.row') || []);
     if (settingsRows[0]) {
       settingsRows[0].querySelector('strong').textContent = t('workDuration');
       settingsRows[0].querySelector('small').textContent = t('workDurationCopy');
@@ -932,10 +975,10 @@
       settingsRows[1].querySelector('small').textContent = t('breakDurationCopy');
     }
 
-    const phaseLabel = document.querySelector('.panel:nth-of-type(3) .stat-row span');
+    const phaseLabel = panels[3]?.querySelector('.stat-row span');
     if (phaseLabel) phaseLabel.textContent = t('currentPhase');
 
-    const goalRows = Array.from(document.querySelectorAll('.panel:nth-of-type(4) .row'));
+    const goalRows = Array.from(panels[4]?.querySelectorAll('.row') || []);
     if (goalRows[0]) {
       goalRows[0].querySelector('strong').textContent = t('enableDailyGoal');
       goalRows[0].querySelector('small').textContent = t('enableDailyGoalCopy');
@@ -944,7 +987,7 @@
       goalRows[1].querySelector('strong').textContent = t('goalDuration');
     }
 
-    const visRows = Array.from(document.querySelectorAll('.panel:nth-of-type(5) .row'));
+    const visRows = Array.from(panels[5]?.querySelectorAll('.row') || []);
     if (visRows[0]) {
       visRows[0].querySelector('strong').textContent = t('showSeconds');
       visRows[0].querySelector('small').textContent = t('showSecondsCopy');
@@ -969,15 +1012,13 @@
     if (el.langButtons[0]) {
       el.langButtons[0].textContent = String.fromCodePoint(0x1F1F9, 0x1F1F7);
       el.langButtons[0].setAttribute('title', lang === 'tr' ? 'Turkce' : 'Turkish');
+      el.langButtons[0].setAttribute('aria-label', lang === 'tr' ? 'Turkce' : 'Turkish');
     }
     if (el.langButtons[1]) {
       el.langButtons[1].textContent = String.fromCodePoint(0x1F1FA, 0x1F1F8);
       el.langButtons[1].setAttribute('title', lang === 'tr' ? 'Ingilizce' : 'English');
+      el.langButtons[1].setAttribute('aria-label', lang === 'tr' ? 'Ingilizce' : 'English');
     }
-
-    el.startButton.textContent = t('start');
-    el.stopButton.textContent = t('stop');
-    el.cancelButton.textContent = t('cancel');
 
     const eyebrow = el.statsPage.querySelector('.eyebrow');
     const statsTitle = el.statsPage.querySelector('.stats-page__title');
@@ -1103,42 +1144,60 @@
   }
 
   function setFlipDigit(slot, nextValue, animate) {
+    if (!slot) {
+      return;
+    }
+
     const hasCurrentValue = typeof slot.dataset.value === 'string' && slot.dataset.value !== '';
     if (!hasCurrentValue) {
       syncFlipDigit(slot, nextValue);
       return;
     }
+
     const currentValue = slot.dataset.value;
     if (currentValue === nextValue) {
       return;
     }
+
     if (!animate) {
       syncFlipDigit(slot, nextValue);
       return;
     }
+
+    if (slot.classList.contains('is-flipping')) {
+      syncFlipDigit(slot, slot.dataset.value || currentValue);
+    }
+
     const topStatic = slot.querySelector('.flip-static--top span');
     const bottomStatic = slot.querySelector('.flip-static--bottom span');
     const topCurrent = slot.querySelector('.flip-flap--top .flip-runner__current');
     const topNext = slot.querySelector('.flip-flap--top .flip-runner__next');
     const bottomCurrent = slot.querySelector('.flip-flap--bottom .flip-runner__current');
     const bottomNext = slot.querySelector('.flip-flap--bottom .flip-runner__next');
+
     topStatic.textContent = currentValue;
     bottomStatic.textContent = currentValue;
     topCurrent.textContent = currentValue;
     topNext.textContent = currentValue;
     bottomCurrent.textContent = nextValue;
     bottomNext.textContent = nextValue;
+
     slot.classList.remove('is-flipping');
     void slot.offsetWidth;
     slot.classList.add('is-flipping');
     slot.dataset.value = nextValue;
+    window.clearTimeout(slot._flipRevealTimer);
+    slot._flipRevealTimer = window.setTimeout(() => {
+      topStatic.textContent = nextValue;
+      bottomStatic.textContent = nextValue;
+    }, FLIP_REVEAL_DELAY_MS);
     window.clearTimeout(slot._flipTimer);
     slot._flipTimer = window.setTimeout(() => {
       syncFlipDigit(slot, nextValue);
-    }, 180);
+    }, FLIP_DURATION_MS);
   }
-
   function syncFlipDigit(slot, value) {
+    window.clearTimeout(slot._flipRevealTimer);
     window.clearTimeout(slot._flipTimer);
     slot.dataset.value = value;
     slot.querySelector('.flip-static--top span').textContent = value;
